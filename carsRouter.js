@@ -43,31 +43,21 @@ router.post("/", async (req, res, next)=> {
             mileage: req.body.mileage
          }
 
-        switch(newCar){
-            case (!newCar.VIN):
+            if (!newCar.VIN || !newCar.model){
                 return res.status(400).json({
-                    message: "VIN is required"
+                    message: "field is required"
                 })
+            }
                 
+            if (!newCar.make || !newCar.mileage){
+                return res.status(400).json({
+                    message: "field is required"
+                })
+            }
             
-            case (!newCar.make):
-                return res.status(400).json({
-                    message: "Make is required"
-                })
-                
-            case (!newCar.model):
-                 return res.status(400).json({
-                    message: "Model is required"
-                 })
-                
-            case (!newCar.mileage):
-                 return res.status(400).json({
-                     message: "Mileage is required"
-                })
-                
-                default:
-
-                const [id] =await db
+            else {
+           
+                const [id] = await db
                     .insert(newCar)
                     .into("cars")
                 
@@ -91,3 +81,35 @@ router.post("/", async (req, res, next)=> {
 
 
 module.exports = router;
+
+
+router.put("/:id", async (req, res, next)=>{
+    try{
+
+        const changeToMake = {
+            VIN: req.body.VIN,
+            mileage: req.body.mileage
+        }
+
+        if(!changeToMake.VIN || !changeToMake.mileage){
+            return res.status(404).json({
+                message: "Fields required"
+            })
+        }
+
+        await db("cars")
+            .where("id", req.params.id)
+            .update(changeToMake)
+
+        const changedCar = await db
+            .select("*")
+            .from("cars")
+            .where("id", req.params.id)
+
+        res.json(changedCar)
+    }
+    catch (err){
+        next(err)
+    }
+
+})
