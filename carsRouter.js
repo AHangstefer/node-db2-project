@@ -43,44 +43,51 @@ router.post("/", async (req, res, next)=> {
             mileage: req.body.mileage
          }
 
-            if (!newCar.VIN || !newCar.model){
-                return res.status(400).json({
-                    message: "field is required"
-                })
-            }
-                
-            if (!newCar.make || !newCar.mileage){
-                return res.status(400).json({
-                    message: "field is required"
-                })
-            }
-            
-            else {
-           
-                const [id] = await db
-                    .insert(newCar)
-                    .into("cars")
-                
-                const car = await db
-                    .select("*") 
-                    .from("cars")
-                    .where("id", id)  
-                    
-                res.status(201).json(car)
-
-
-            }
-
-
+        if(!newCar.VIN) {
+            return res.status(404).json({
+                message: "Fields required"
+            })
         }
+
+        if(!newCar.make){
+            return res.status(404).json({
+                message: "Fields required"
+            })
+        }
+
+        if(!newCar.model){
+            return res.status(404).json({
+                message: "FIELDS REQUIRED!"
+            })
+        }
+
+        if(!newCar.mileage){
+            return res.status({
+                message: "Mileage is required"
+            })
+        }
+            
+           
+            const [id] = await db
+                .insert(newCar)
+                .into("cars")
+                    
+            const car = await db
+                .select("*") 
+                .from("cars")
+                .where("id", id)  
+                        
+            res.status(201).json(car)
+
+
+    }
         catch(err){
             next(err)
         }
-        
- })
+    
+})
 
 
-module.exports = router;
 
 
 router.put("/:id", async (req, res, next)=>{
@@ -88,14 +95,35 @@ router.put("/:id", async (req, res, next)=>{
 
         const changeToMake = {
             VIN: req.body.VIN,
+            make: req.body.make,
+            model: req.body.model,
             mileage: req.body.mileage
         }
 
-        if(!changeToMake.VIN || !changeToMake.mileage){
+        if(!changeToMake.VIN) {
             return res.status(404).json({
                 message: "Fields required"
             })
         }
+
+       if(!changeToMake.make){
+            return res.status(404).json({
+                message: "Fields required"
+            })
+        }
+
+        if(!changeToMake.model){
+            return res.status(404).json({
+                message: "FIELDS REQUIRED!"
+            })
+        }
+
+        if(!changeToMake.mileage){
+            return res.status({
+                message: "Mileage is required"
+            })
+        }
+
 
         await db("cars")
             .where("id", req.params.id)
@@ -113,3 +141,21 @@ router.put("/:id", async (req, res, next)=>{
     }
 
 })
+
+router.delete("/:id", async (req, res, next)=> {
+    try{
+        await db("cars")
+            .where("id", req.params.id)
+            .del()
+        res.status(204).end()
+
+    }
+    catch(err){
+        next(err)
+    }
+})
+
+
+
+
+module.exports = router;
